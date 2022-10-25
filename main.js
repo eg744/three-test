@@ -1,14 +1,34 @@
 import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+// dat depreciated
+import * as dat from 'dat.gui';
+import GUI from 'lil-gui';
 
+const canvas = document.querySelector('canvas.webgl');
+
+// Debug
+const gui = new GUI();
+
+// Textures
+const textureLoader = new THREE.TextureLoader();
+const exampleNormalTexture = textureLoader.load(
+	'/static/textures/exampleNormalMap.png'
+);
+
+const renderer = new THREE.WebGLRenderer({
+	canvas: canvas,
+	antialias: true,
+	alpha: true,
+});
 // flat plane
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+// alpha: transparent bg
+// const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // Sets the color of the background
-renderer.setClearColor(0xfefefe);
+// renderer.setClearColor(0xfefefe);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -18,11 +38,14 @@ const camera = new THREE.PerspectiveCamera(
 	1000
 );
 const geometryCube = new THREE.BoxGeometry(1, 1, 1);
-const cubeMaterial = new THREE.MeshBasicMaterial({
+const cubeBasicMaterial = new THREE.MeshBasicMaterial({
 	color: 0x00ff00,
+	// wireframe: true,,
 	// wireframe: true,
 });
-const cube = new THREE.Mesh(geometryCube, cubeMaterial);
+const cubeStandardMaterial = new THREE.MeshStandardMaterial();
+cubeStandardMaterial.normalMap = exampleNormalTexture;
+const cube = new THREE.Mesh(geometryCube, cubeStandardMaterial);
 scene.add(cube);
 
 const geometryTorus = new THREE.TorusGeometry(3, 0.5, 100);
@@ -35,11 +58,26 @@ scene.add(torus);
 
 // camera.position.z = 5;
 
+// Light
+const pointLight = new THREE.PointLight(0xffffff, 0.1);
+pointLight.position.x = 2;
+pointLight.position.y = 3;
+pointLight.position.z = 4;
+scene.add(pointLight);
+
+const pointLight2 = new THREE.PointLight(0xff0000, 0.2);
+pointLight2.position.set(1, 1, 1);
+scene.add(pointLight2);
+
+gui.add(pointLight2.position, 'y');
+
 // Sets orbit control to move the camera around
+// const orbit = new OrbitControls(camera, renderer.domElement);
 const orbit = new OrbitControls(camera, renderer.domElement);
 
 // Camera positioning
 camera.position.set(6, 8, 14);
+
 orbit.update();
 
 // Sets a 12 by 12 grid
@@ -51,8 +89,8 @@ const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
 
 function animate() {
-	// cube.rotation.x += 0.001;
-	// cube.rotation.y += 0.001;
+	cube.rotation.x += 0.001;
+	cube.rotation.y += 0.001;
 	renderer.render(scene, camera);
 }
 
